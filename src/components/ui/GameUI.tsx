@@ -10,8 +10,8 @@ interface GameUIProps {
 export function GameUI({ children, score, level, lines }: GameUIProps) {
     return (
         <div className="relative flex min-h-screen flex-col items-center justify-center p-4">
-            {/* Background with overlay */}
-            <div className="absolute inset-0 z-0 bg-gwanghwamun-night bg-cover bg-center opacity-80" />
+            {/* Background with overlay - Gwanghwamun Night */}
+            <div className="absolute inset-0 z-0 bg-cover bg-center opacity-80" style={{ background: 'linear-gradient(to bottom, #0F2027, #203A43, #2C5364)' }} />
             <div className="absolute inset-0 z-0 bg-black/40" />
 
             {/* Main Game Container - Hanok Style */}

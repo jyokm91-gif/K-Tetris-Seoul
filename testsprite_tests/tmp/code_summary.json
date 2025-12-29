@@ -1,0 +1,51 @@
+{
+    "tech_stack": [
+        "TypeScript",
+        "Next.js",
+        "React",
+        "Tailwind CSS",
+        "Zustand"
+    ],
+    "features": [
+        {
+            "name": "Game Engine",
+            "description": "Core Tetris game logic including movement, collision detection, locking, and line clearing.",
+            "files": [
+                "src/lib/game/engine.ts",
+                "src/hooks/useGameLoop.ts",
+                "src/lib/game/types.ts",
+                "src/lib/game/constants.ts",
+                "src/lib/game/tetrominoes.ts"
+            ]
+        },
+        {
+            "name": "Input Controls",
+            "description": "Handles keyboard inputs for moving, rotating, and dropping tetrominoes.",
+            "files": [
+                "src/hooks/useControls.ts"
+            ]
+        },
+        {
+            "name": "Game State Management",
+            "description": "Manages UI state (score, level, status) using Zustand.",
+            "files": [
+                "src/store/gameStore.ts"
+            ]
+        },
+        {
+            "name": "Game Board Rendering",
+            "description": "Renders the game grid and active pieces using Canvas.",
+            "files": [
+                "src/components/game/GameCanvas.tsx",
+                "src/components/game/GameBoard.tsx"
+            ]
+        },
+        {
+            "name": "Audio System",
+            "description": "Manages background music and sound effects.",
+            "files": [
+                "src/hooks/useAudio.ts"
+            ]
+        }
+    ]
+}

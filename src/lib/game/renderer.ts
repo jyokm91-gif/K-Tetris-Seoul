@@ -1,5 +1,6 @@
 import { CellValue, Position, Tetromino, TetrominoType } from "./types";
-import { BOARD_HEIGHT, BOARD_WIDTH, TETROMINO_COLORS, TETROMINO_SHAPES, VISIBLE_HEIGHT } from "./constants";
+import { BOARD_HEIGHT, BOARD_WIDTH, VISIBLE_HEIGHT, TETROMINO_COLORS } from "./constants";
+import { TETROMINO_SHAPES } from "./tetrominoes";
 
 interface BlockRenderOptions {
     x: number;

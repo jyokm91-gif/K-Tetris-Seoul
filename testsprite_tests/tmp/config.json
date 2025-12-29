@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3001",
+  "executionArgs": {
+    "projectName": "k-tetris-seoul",
+    "projectPath": "c:\\Users\\jyokm\\.claude-worktrees\\k-tetris-seoul\\quizzical-hypatia",
+    "testIds": [],
+    "additionalInstruction": "Referencing docs/project_plan.md. Target: http://localhost:3001.\nTest Scenarios (Required):\n1. Game Start: Click 'Start Game' -> Game starts, BGM plays (check audio element or state).\n2. Block Movement: Arrow actions (Left, Right, Down) -> Block moves without delay.\n3. Rotation System: Spacebar/Up Arrow -> Block rotates. Verify Wall Kick.\n4. Line Clear: Fill a row -> Line clears, Score increases.\n5. Game Over: Stack blocks to top -> 'Game Over' modal appears.\n6. Visual Check: Verify 'Obangsaek' colors and background.\nIMPORTANT: The server is running on PORT 3001. Ensure all Playwright/Puppeteer navigations go to http://localhost:3001.",
+    "envs": {
+      "API_KEY": "sk-user-tL6_2Lq5RpbbCi1gpT7ZqpS_gNuotCPu-vzf0GezuG2jVoTKaXlGeMFACeFnYV5ySqgdoOiFKHEl5wh_C6DeHdz3evoNM99_-Q63QCKtutain4VXohjE7IbJRsYaXsnI47k"
+    }
+  },
+  "proxy": "http://b0f51a64-bb78-4c53-b62d-845bdf92c623:e1Vi3qhbvJBUvnN7DjlUtQksOLZ7MGiI@tun.testsprite.com:8080"
+}
