@@ -49,7 +49,7 @@ export const useGameStore = create<GameState>((set) => ({
             // 3 lines: 300 * (level + 1)
             // 4 lines: 1200 * (level + 1)
             const points = [0, 40, 100, 300, 1200];
-            const gained = (points[linesCleared] || 0) * (level);
+            const gained = (points[linesCleared] || 0) * (level + 1);
             return { score: state.score + gained, lines: state.lines + linesCleared };
         })
     }
