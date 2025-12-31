@@ -18,7 +18,7 @@ export function GameUI({ children, score, level, lines, leaderboardEntries = [] 
             <KoreanPalaceBackground />
 
             {/* Background Music Player */}
-            <BackgroundMusic autoPlay={true} />
+            <BackgroundMusic />
 
             {/* Main Game Container - Hanok Style */}
             <div className="z-10 flex flex-col items-center gap-3 md:gap-6 lg:flex-row lg:items-start w-full max-w-screen-xl mt-2 md:mt-0">
