@@ -13,12 +13,12 @@ interface GameUIProps {
 
 export function GameUI({ children, score, level, lines, leaderboardEntries = [] }: GameUIProps) {
     return (
-        <div className="relative flex min-h-screen flex-col items-start md:items-center p-2 md:p-4 pt-2 pb-44 md:pb-4 overflow-x-hidden">
+        <div className="relative flex min-h-screen flex-col items-start md:items-center justify-start md:justify-center p-2 md:p-4 pt-2 pb-4 md:pb-4 overflow-x-hidden">
             {/* Korean Palace Background */}
             <KoreanPalaceBackground />
 
             {/* Background Music Player */}
-            <BackgroundMusic />
+            <BackgroundMusic autoPlay={true} />
 
             {/* Main Game Container - Hanok Style */}
             <div className="z-10 flex flex-col items-center gap-3 md:gap-6 lg:flex-row lg:items-start w-full max-w-screen-xl mt-2 md:mt-0">
@@ -29,13 +29,24 @@ export function GameUI({ children, score, level, lines, leaderboardEntries = [] 
                 </div>
 
                 {/* Center - Game Board */}
-                <div className="hanok-frame relative p-1 bg-black/80 w-full md:w-auto flex flex-col items-center">
+                <div className="hanok-frame relative p-1 bg-black/60 w-full md:w-auto flex flex-col items-center backdrop-blur-sm">
                     {/* Dancheong Pattern Border */}
                     <div className="absolute inset-0 border-4 border-transparent bg-dancheong_pattern opacity-30 pointer-events-none" style={{ backgroundSize: '24px' }} />
 
                     {/* The Canvas */}
-                    <div className="relative border-2 border-obangsaek-cheong/50 bg-black mx-auto">
-                        {children}
+                    <div className="relative border-2 border-obangsaek-cheong/50 bg-black/30 backdrop-blur-sm mx-auto overflow-hidden">
+                        {/* Palace background visible through canvas */}
+                        <div
+                            className="absolute inset-0 opacity-20 bg-cover bg-center pointer-events-none"
+                            style={{
+                                backgroundImage: 'url(/images/gyeongbokgung.jpg)',
+                                backgroundPosition: 'center 40%',
+                                filter: 'brightness(0.8) contrast(1.2)',
+                            }}
+                        />
+                        <div className="relative z-10">
+                            {children}
+                        </div>
                     </div>
 
                     {/* Decorative Text */}

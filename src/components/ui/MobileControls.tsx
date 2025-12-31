@@ -10,8 +10,8 @@ interface MobileControlsProps {
 
 export function MobileControls({ onMove, onRotate, onHardDrop }: MobileControlsProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-gradient-to-t from-black via-black/95 to-transparent backdrop-blur-md border-t-2 border-obangsaek-cheong/50 pb-safe">
-      <div className="flex items-end justify-between max-w-2xl mx-auto gap-6 p-4 px-6">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-gradient-to-t from-black via-black/95 to-transparent backdrop-blur-md border-t-2 border-obangsaek-cheong/50">
+      <div className="flex items-end justify-between max-w-2xl mx-auto gap-6 p-3 px-4 pb-4">
         {/* Left Side - Movement Controls */}
         <div className="flex flex-col gap-3">
           <div className="text-center text-xs text-gray-400 mb-1 font-bold">이동</div>
