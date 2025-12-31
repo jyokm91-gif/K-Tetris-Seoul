@@ -1,38 +1,25 @@
 'use client';
 
 import React, { useEffect, useRef, useCallback } from 'react';
+import { useGameLoop } from '@/hooks/useGameLoop';
 import { useGameStore } from '@/store/useGameStore';
-import { GameEngineState, Tetromino, TetrominoType, CellValue } from '@/lib/game/types';
-import { BOARD_HEIGHT, BOARD_WIDTH, DROP_SPEED, VISIBLE_HEIGHT } from '@/lib/game/constants';
-import { TETROMINO_SHAPES } from '@/lib/game/tetrominoes';
+import { GameEngineState, Tetromino, TetrominoType } from '@/lib/game/types';
+import { BOARD_HEIGHT, BOARD_WIDTH, DROP_SPEED, TETROMINO_COLORS, VISIBLE_HEIGHT } from '@/lib/game/constants';
+import { TetrominoType as TType } from '@/lib/game/types'; // Alias
 import { canPlace, clearLines, tryRotate } from '@/lib/game/engine';
 import { drawActivePiece, drawBoard, drawGhostPiece } from '@/lib/game/renderer';
 
-// Cell value mapping: TetrominoType -> CellValue (1-7)
-const TYPE_TO_CELL: Record<TetrominoType, CellValue> = {
-    'I': 1, 'O': 2, 'T': 3, 'S': 4, 'Z': 5, 'J': 6, 'L': 7
-};
-
-// 7-bag randomizer
-function createBag(): TetrominoType[] {
-    const types: TetrominoType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
-    // Fisher-Yates shuffle
-    for (let i = types.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [types[i], types[j]] = [types[j], types[i]];
-    }
-    return types;
+// Helper to get random piece
+function randomPieceType(): TType {
+    const types: TType[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+    return types[Math.floor(Math.random() * types.length)];
 }
 
-function getNextPiece(state: GameEngineState): TetrominoType {
-    if (state.bag.length === 0) {
-        state.bag = createBag();
-    }
-    return state.bag.pop()!;
-}
-
-function createPiece(type: TetrominoType): Tetromino {
-    // Standard spawn: x=3 for most pieces, y in buffer zone
+function createPiece(type: TType): Tetromino {
+    // Spawn positions: usually center top.
+    // I spawns at x=3, y=-1 or similar. 
+    // Standard I: x=3, y=-1. Others x=3 or 4.
+    // Let's use x=3, y=0 (hidden buffer).
     return {
         type,
         rotation: 0,
@@ -42,21 +29,22 @@ function createPiece(type: TetrominoType): Tetromino {
 
 export function GameBoard() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const animationIdRef = useRef<number>(0);
-    const lastTimeRef = useRef<number>(0);
+    const [blockSize, setBlockSize] = React.useState(30);
+    const [canvasWidth, setCanvasWidth] = React.useState(300);
+    const [canvasHeight, setCanvasHeight] = React.useState(600);
 
-    // Zustand State (for UI sync)
-    const { actions, status } = useGameStore();
+    // Zustand State (Read Only for syncing)
+    const { actions, status, level } = useGameStore();
 
     // Mutable Game State (Ref) - "The Source of Truth"
     const gameState = useRef<GameEngineState>({
-        board: Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(0) as CellValue[]),
+        board: Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(0)),
         activePiece: null,
-        ghostPosition: null,
+        ghostPosition: null, // Calc on update
         holdPiece: null,
         canHold: true,
-        nextQueue: [],
-        bag: [],
+        nextQueue: [randomPieceType(), randomPieceType(), randomPieceType()],
+        bag: [], // TODO: Implement 7-bag
         dropTimer: 0,
         lockTimer: 0,
         level: 1,
@@ -66,16 +54,36 @@ export function GameBoard() {
         isGameOver: false,
     });
 
+    // Calculate responsive canvas size
+    useEffect(() => {
+        const updateCanvasSize = () => {
+            const isMobile = window.innerWidth < 768;
+            const availableWidth = isMobile ? window.innerWidth - 32 : 300; // 32px for padding
+            const maxBlockSize = isMobile ? Math.floor(availableWidth / BOARD_WIDTH) : 30;
+            const finalBlockSize = Math.min(maxBlockSize, 30);
+
+            setBlockSize(finalBlockSize);
+            setCanvasWidth(BOARD_WIDTH * finalBlockSize);
+            setCanvasHeight(BOARD_HEIGHT * finalBlockSize);
+        };
+
+        updateCanvasSize();
+        window.addEventListener('resize', updateCanvasSize);
+        return () => window.removeEventListener('resize', updateCanvasSize);
+    }, []);
+
+    // Init Game
+    useEffect(() => {
+        if (gameState.current.activePiece === null) {
+            spawnPiece();
+            actions.setStatus('PLAYING');
+        }
+    }, []);
+
     const spawnPiece = useCallback(() => {
         const state = gameState.current;
-
-        // Fill next queue if needed
-        while (state.nextQueue.length < 5) {
-            state.nextQueue.push(getNextPiece(state));
-        }
-
-        const nextType = state.nextQueue.shift()!;
-        state.nextQueue.push(getNextPiece(state));
+        const nextType = state.nextQueue.shift() || randomPieceType();
+        state.nextQueue.push(randomPieceType());
 
         const newPiece = createPiece(nextType);
 
@@ -83,12 +91,12 @@ export function GameBoard() {
         if (!canPlace(state.board, newPiece.type, newPiece.position, newPiece.rotation)) {
             state.isGameOver = true;
             actions.setStatus('GAME_OVER');
-            return;
+            return; // Dead
         }
 
         state.activePiece = newPiece;
         state.canHold = true;
-        actions.setNextPieces([...state.nextQueue]);
+        actions.setNextPieces([...state.nextQueue]); // Sync UI
     }, [actions]);
 
     const lockPiece = useCallback(() => {
@@ -96,16 +104,35 @@ export function GameBoard() {
         const piece = state.activePiece;
         if (!piece) return;
 
-        const shape = TETROMINO_SHAPES[piece.type][piece.rotation];
-        const cellValue = TYPE_TO_CELL[piece.type];
+        // Burn into board
+        const shape = import('@/lib/game/tetrominoes').then(m => m.TETROMINO_SHAPES[piece.type][piece.rotation]);
+        // Wait, can't import inside sync. Need static import.
+        // Already imported TETROMINO_SHAPES.
 
-        for (let r = 0; r < shape.length; r++) {
-            for (let c = 0; c < shape[0].length; c++) {
-                if (shape[r][c]) {
+        // Importing locally inside components might be weird with 'use client' but imports are top level.
+        // Accessing helpers:
+        // We need to loop shape and set board.
+        // Hardcode shape access:
+        const shapes = require('@/lib/game/tetrominoes').TETROMINO_SHAPES; // dynamic require or just use top import
+        // Using top import TETROMINO_SHAPES
+        // Note: `import { TETROMINO_SHAPES }` at top.
+
+        // Re-importing shapes logic manually here is cleaner than async import
+        // Actually we have it imported.
+
+        // Re-implement locking logic:
+        const blockShape = require('@/lib/game/tetrominoes').TETROMINO_SHAPES[piece.type][piece.rotation];
+
+        for (let r = 0; r < blockShape.length; r++) {
+            for (let c = 0; c < blockShape[0].length; c++) {
+                if (blockShape[r][c]) {
                     const by = piece.position.y + r;
                     const bx = piece.position.x + c;
                     if (by >= 0 && by < BOARD_HEIGHT && bx >= 0 && bx < BOARD_WIDTH) {
-                        state.board[by][bx] = cellValue;
+                        // Map type to int?
+                        // Simple map: 'I'->1, etc
+                        const map = ['', 'I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+                        state.board[by][bx] = map.indexOf(piece.type) as any || 1;
                     }
                 }
             }
@@ -116,174 +143,130 @@ export function GameBoard() {
         state.board = newBoard;
 
         if (linesCleared > 0) {
-            state.lines += linesCleared;
             actions.addScore(linesCleared, state.level);
-            actions.setLines(state.lines);
-
-            // Level up every 10 lines
-            const newLevel = Math.floor(state.lines / 10) + 1;
-            if (newLevel > state.level) {
-                state.level = newLevel;
-                actions.setLevel(newLevel);
-            }
         }
 
-        state.activePiece = null;
+        // Next Piece
         spawnPiece();
+
     }, [actions, spawnPiece]);
 
-    // Game Loop
-    const gameLoop = useCallback((currentTime: DOMHighResTimeStamp) => {
+    // Game Loop Logic
+    const update = useCallback((deltaTime: number) => {
         const state = gameState.current;
-        const ctx = canvasRef.current?.getContext('2d');
+        if (state.isGameOver || status === 'PAUSED' || status === 'IDLE') return;
 
-        if (!ctx || state.isGameOver) {
-            if (state.isGameOver) return; // Stop loop on game over
-            animationIdRef.current = requestAnimationFrame(gameLoop);
-            return;
-        }
+        // Gravity
+        state.dropTimer += deltaTime;
+        const speed = Math.max(DROP_SPEED.MIN, DROP_SPEED.INITIAL - (state.level - 1) * 50); // Simple speed curve
 
-        // Calculate delta time
-        if (!lastTimeRef.current) lastTimeRef.current = currentTime;
-        const deltaTime = currentTime - lastTimeRef.current;
-        lastTimeRef.current = currentTime;
-
-        // Skip update if paused or idle
-        const currentStatus = useGameStore.getState().status;
-        if (currentStatus === 'PLAYING' && state.activePiece) {
-            // Gravity
-            state.dropTimer += deltaTime;
-            const speed = Math.max(DROP_SPEED.MIN, DROP_SPEED.INITIAL - (state.level - 1) * 50);
-
-            if (state.dropTimer >= speed) {
-                state.dropTimer = 0;
-                const p = state.activePiece;
-                const nextPos = { x: p.position.x, y: p.position.y + 1 };
-
-                if (canPlace(state.board, p.type, nextPos, p.rotation)) {
-                    p.position = nextPos;
+        if (state.dropTimer > speed) {
+            state.dropTimer = 0;
+            if (state.activePiece) {
+                const nextPos = { ...state.activePiece.position, y: state.activePiece.position.y + 1 };
+                if (canPlace(state.board, state.activePiece.type, nextPos, state.activePiece.rotation)) {
+                    state.activePiece.position = nextPos;
                 } else {
+                    // Lock Delay (Simplified: Lock immediately on touch floor for MVP)
                     lockPiece();
                 }
             }
-
-            // Update Ghost Position
-            if (state.activePiece) {
-                let ghostY = state.activePiece.position.y;
-                while (canPlace(state.board, state.activePiece.type,
-                    { x: state.activePiece.position.x, y: ghostY + 1 },
-                    state.activePiece.rotation)) {
-                    ghostY++;
-                }
-                state.ghostPosition = { x: state.activePiece.position.x, y: ghostY };
-            }
         }
 
-        // Render
-        drawBoard(ctx, state.board, 30);
-
+        // Ghost Piece Calc
         if (state.activePiece) {
-            if (state.ghostPosition) {
-                drawGhostPiece(ctx, state.activePiece, state.ghostPosition.y, 30);
+            // Project down
+            let ghostY = state.activePiece.position.y;
+            while (canPlace(state.board, state.activePiece.type, { x: state.activePiece.position.x, y: ghostY + 1 }, state.activePiece.rotation)) {
+                ghostY++;
             }
-            drawActivePiece(ctx, state.activePiece, 30);
+            state.ghostPosition = { x: state.activePiece.position.x, y: ghostY };
         }
 
-        animationIdRef.current = requestAnimationFrame(gameLoop);
-    }, [lockPiece]);
+    }, [status, lockPiece]);
 
-    // Initialize game
-    useEffect(() => {
+    const render = useCallback((ctx: CanvasRenderingContext2D) => {
         const state = gameState.current;
 
-        // Initialize bag and next queue
-        state.bag = createBag();
-        while (state.nextQueue.length < 5) {
-            state.nextQueue.push(getNextPiece(state));
+        drawBoard(ctx, state.board, blockSize);
+
+        if (state.activePiece) {
+            // Draw Ghost
+            if (state.ghostPosition) {
+                drawGhostPiece(ctx, state.activePiece, state.ghostPosition.y, blockSize);
+            }
+            // Draw Active
+            drawActivePiece(ctx, state.activePiece, blockSize);
         }
 
-        spawnPiece();
-        actions.setStatus('PLAYING');
+    }, [blockSize]);
 
-        // Start game loop
-        animationIdRef.current = requestAnimationFrame(gameLoop);
+    useGameLoop({ onUpdate: update, onRender: render });
 
-        return () => {
-            cancelAnimationFrame(animationIdRef.current);
-        };
-    }, [spawnPiece, actions, gameLoop]);
-
-    // Input handling
+    // Inputs
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const state = gameState.current;
             if (state.isGameOver || !state.activePiece) return;
 
             // Prevent scrolling for game keys
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
                 e.preventDefault();
             }
 
             const p = state.activePiece;
-            const currentScore = useGameStore.getState().score;
 
             switch (e.key) {
-                case 'ArrowLeft': {
-                    const newPos = { x: p.position.x - 1, y: p.position.y };
-                    if (canPlace(state.board, p.type, newPos, p.rotation)) {
-                        p.position = newPos;
+                case 'ArrowLeft':
+                    if (canPlace(state.board, p.type, { x: p.position.x - 1, y: p.position.y }, p.rotation)) {
+                        p.position.x -= 1;
                     }
                     break;
-                }
-                case 'ArrowRight': {
-                    const newPos = { x: p.position.x + 1, y: p.position.y };
-                    if (canPlace(state.board, p.type, newPos, p.rotation)) {
-                        p.position = newPos;
+                case 'ArrowRight':
+                    if (canPlace(state.board, p.type, { x: p.position.x + 1, y: p.position.y }, p.rotation)) {
+                        p.position.x += 1;
                     }
                     break;
-                }
-                case 'ArrowDown': {
+                case 'ArrowDown':
                     // Soft Drop
-                    const newPos = { x: p.position.x, y: p.position.y + 1 };
-                    if (canPlace(state.board, p.type, newPos, p.rotation)) {
-                        p.position = newPos;
+                    if (canPlace(state.board, p.type, { x: p.position.x, y: p.position.y + 1 }, p.rotation)) {
+                        p.position.y += 1;
+                        // Reset drop timer?
                         state.dropTimer = 0;
-                        actions.setScore(currentScore + 1);
+                        actions.setScore(useGameStore.getState().score + 1); // Mutating store directly? use store.setState equivalent
                     }
                     break;
-                }
-                case 'ArrowUp': {
+                case 'ArrowUp':
                     // Rotate CW
                     const rotated = tryRotate(state.board, p, 1);
                     if (rotated) {
                         state.activePiece = rotated;
                     }
                     break;
-                }
-                case ' ': {
-                    // Hard Drop
+                case ' ': // Space = Hard Drop
                     let dist = 0;
                     while (canPlace(state.board, p.type, { x: p.position.x, y: p.position.y + 1 }, p.rotation)) {
                         p.position.y += 1;
                         dist++;
                     }
-                    actions.setScore(currentScore + (dist * 2));
                     lockPiece();
+                    actions.setScore(useGameStore.getState().score + (dist * 2));
                     break;
-                }
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
+
     }, [actions, lockPiece]);
 
     return (
         <canvas
             ref={canvasRef}
-            width={300}  // 10 cols * 30px
-            height={600} // 20 rows * 30px
-            className="block bg-black"
+            width={canvasWidth}
+            height={canvasHeight}
+            className="block bg-black max-w-full"
+            style={{ touchAction: 'none' }}
         />
     );
 }

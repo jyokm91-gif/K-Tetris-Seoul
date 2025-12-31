@@ -1,549 +1,341 @@
 [
   {
     "id": "TC001",
-    "title": "Game Start Transitions from IDLE to PLAYING",
-    "description": "Verify that starting a new game changes the game state from IDLE to PLAYING and the UI updates accordingly.",
+    "title": "Game Initialization",
+    "description": "Verify that the game initializes correctly displaying an empty game board, default score (0), level (1), and game status as 'ready'.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Load the main game page."
+        "description": "Open the K-Tetris Seoul web app in a supported browser."
       },
       {
         "type": "assertion",
-        "description": "Verify the initial game state is IDLE."
-      },
-      {
-        "type": "action",
-        "description": "Trigger the start game command."
+        "description": "Confirm the game board is rendered empty with no active tetrominoes."
       },
       {
         "type": "assertion",
-        "description": "Confirm the game state changes to PLAYING."
+        "description": "Verify initial score is displayed as 0."
       },
       {
         "type": "assertion",
-        "description": "Verify UI overlays update to reflect active gameplay state."
+        "description": "Verify initial level is displayed as 1."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify game status shows 'ready' or initial starting state."
       }
     ]
   },
   {
     "id": "TC002",
-    "title": "Tetromino Spawn Position and Initial State",
-    "description": "Check that tetromino pieces spawn at the top center of the board in their default orientation.",
+    "title": "Tetromino Spawn and Movement",
+    "description": "Verify that a new tetromino spawns at the top-center of the board and can be moved left, right, and down correctly with keyboard controls.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game."
+        "description": "Start a new game or resume from the initial state."
       },
       {
         "type": "assertion",
-        "description": "Verify the first tetromino spawns at the top center grid position."
+        "description": "Confirm a tetromino piece appears at the top-center of the game board."
+      },
+      {
+        "type": "action",
+        "description": "Use left arrow key to move the piece left."
       },
       {
         "type": "assertion",
-        "description": "Verify the tetromino is in its default rotation state."
+        "description": "Check that the tetromino moves one cell to the left without crossing left boundary."
+      },
+      {
+        "type": "action",
+        "description": "Use right arrow key to move the piece right."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the tetromino moves one cell to the right without crossing right boundary."
+      },
+      {
+        "type": "action",
+        "description": "Use down arrow key to move the piece down."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the tetromino moves one cell down."
       }
     ]
   },
   {
     "id": "TC003",
-    "title": "Tetromino Keyboard Control: Move Left",
-    "description": "Validate that pressing the left arrow key moves the current tetromino piece left by one column if no collision occurs.",
+    "title": "Tetromino Rotation Mechanics",
+    "description": "Verify that the tetromino rotates correctly clockwise with keyboard input without clipping into other blocks or walls.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game with piece spawned."
+        "description": "Start a new game and let a tetromino spawn."
       },
       {
         "type": "action",
-        "description": "Press the left arrow key once."
+        "description": "Press the rotate key (typically up arrow or 'X' key)."
       },
       {
         "type": "assertion",
-        "description": "Verify the piece moves one column to the left if the position is valid."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to move left at the left boundary repeatedly."
+        "description": "Verify the tetromino rotates correctly in a clockwise direction."
       },
       {
         "type": "assertion",
-        "description": "Verify piece does not move outside the left board boundary."
+        "description": "Ensure the rotated piece does not overlap existing locked blocks or go beyond game board boundaries."
       }
     ]
   },
   {
     "id": "TC004",
-    "title": "Tetromino Keyboard Control: Move Right",
-    "description": "Validate that pressing the right arrow key moves the current tetromino piece right by one column if no collision occurs.",
+    "title": "Soft Drop and Hard Drop Functionality",
+    "description": "Verify soft drop (increase descent speed) and hard drop (instantly drop tetromino to bottom) controls work correctly.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game with piece spawned."
+        "description": "Start a new game with an active tetromino."
       },
       {
         "type": "action",
-        "description": "Press the right arrow key once."
+        "description": "Press and hold the down arrow key (soft drop)."
       },
       {
         "type": "assertion",
-        "description": "Verify the piece moves one column to the right if the position is valid."
+        "description": "Verify that the tetromino descends faster than normal."
       },
       {
         "type": "action",
-        "description": "Attempt to move right at the right boundary repeatedly."
+        "description": "Press the hard drop key (usually spacebar)."
       },
       {
         "type": "assertion",
-        "description": "Verify piece does not move outside the right board boundary."
+        "description": "Verify the tetromino instantly drops and locks at the bottom or on top of existing blocks."
       }
     ]
   },
   {
     "id": "TC005",
-    "title": "Tetromino Rotation Input and Collision Detection",
-    "description": "Ensure tetromino rotates correctly on valid rotation keys and does not rotate into blocked or out-of-bound positions.",
+    "title": "Collision Detection and Locking",
+    "description": "Verify that tetrominoes lock correctly upon collision with the bottom or other locked pieces and a new piece spawns.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game with piece spawned."
-      },
-      {
-        "type": "action",
-        "description": "Press the rotate key (e.g., up arrow or designated key)."
+        "description": "Let a tetromino fall to bottom or onto existing blocks."
       },
       {
         "type": "assertion",
-        "description": "Verify the tetromino rotates 90 degrees clockwise."
-      },
-      {
-        "type": "action",
-        "description": "Attempt rotation near the left wall."
+        "description": "Confirm the tetromino locks in place upon collision."
       },
       {
         "type": "assertion",
-        "description": "Rotation is allowed only if the resulting position is within bounds and not colliding."
-      },
-      {
-        "type": "action",
-        "description": "Attempt rotation that would collide with locked blocks."
-      },
-      {
-        "type": "assertion",
-        "description": "Block rotation is prevented and the tetromino remains in current orientation."
+        "description": "Verify a new tetromino spawns at the top-center of the board."
       }
     ]
   },
   {
     "id": "TC006",
-    "title": "Soft Drop Functionality",
-    "description": "Validate the piece moves down faster while soft drop key is pressed, respecting collision and boundaries.",
+    "title": "Line Clearing and Score Update",
+    "description": "Validate that completed horizontal lines are cleared from the game board, score and level update correctly.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game with piece spawned."
-      },
-      {
-        "type": "action",
-        "description": "Press and hold the soft drop key."
+        "description": "Arrange tetrominoes to complete at least one full horizontal line."
       },
       {
         "type": "assertion",
-        "description": "Verify the piece moves downward at an accelerated rate."
-      },
-      {
-        "type": "action",
-        "description": "Release the soft drop key."
+        "description": "Verify the completed line(s) are cleared from the board."
       },
       {
         "type": "assertion",
-        "description": "Verify the piece drops at normal gravity rate."
-      },
-      {
-        "type": "action",
-        "description": "Use soft drop when the piece is directly above locked blocks."
+        "description": "Confirm score is updated according to number of lines cleared."
       },
       {
         "type": "assertion",
-        "description": "Piece stops moving down without overlapping locked blocks."
+        "description": "Verify level is incremented appropriately when reaching score thresholds."
       }
     ]
   },
   {
     "id": "TC007",
-    "title": "Hard Drop Functionality",
-    "description": "Ensure pressing hard drop instantly places tetromino at the lowest possible position and locks it.",
+    "title": "Game Over Condition",
+    "description": "Verify the game detects loss condition when new tetromino cannot spawn and displays game-over screen/state.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game with piece spawned."
-      },
-      {
-        "type": "action",
-        "description": "Press the hard drop key."
+        "description": "Fill the game board up to the top with locked tetrominoes."
       },
       {
         "type": "assertion",
-        "description": "Verify the piece immediately moves to the lowest available valid row."
+        "description": "Attempt to spawn a new tetromino."
       },
       {
         "type": "assertion",
-        "description": "Piece locks in place and triggers line clearing if appropriate."
+        "description": "Verify that the game detects the loss condition and displays the game over state."
       }
     ]
   },
   {
     "id": "TC008",
-    "title": "Line Clearing and Score Update",
-    "description": "Validate that completing a line causes it to clear properly, the score updates correctly, and UI reflects those changes.",
-    "category": "functional",
-    "priority": "High",
+    "title": "Responsive Canvas Rendering",
+    "description": "Confirm the game board canvas renders correctly and scales appropriately on different screen sizes and resolutions.",
+    "category": "ui",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game and arrange blocks to complete one or multiple lines."
+        "description": "Open the game on desktop at various screen resolutions."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the game board scales appropriately without distortion or clipping."
       },
       {
         "type": "action",
-        "description": "Lock piece completing the line(s)."
+        "description": "Open the game on mobile browsers with varying screen sizes."
       },
       {
         "type": "assertion",
-        "description": "Verify the completed line(s) clear from the board."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm score, lines cleared, and level update accordingly in the Zustand store."
-      },
-      {
-        "type": "assertion",
-        "description": "UI overlays update instantly reflecting new score and lines."
+        "description": "Confirm the canvas game board is fully visible, correctly proportioned, and responsive."
       }
     ]
   },
   {
     "id": "TC009",
-    "title": "Game Over State Transition",
-    "description": "Validate game transitions to GAME OVER state when new pieces cannot spawn, and UI updates accordingly.",
+    "title": "Audio Playback and Controls",
+    "description": "Verify background music plays continuously and sound effects trigger on game events with controllable volume.",
     "category": "functional",
-    "priority": "High",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Fill the board to leave no space for new tetromino spawn."
+        "description": "Start a new game and allow gameplay to begin."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify background music starts playing automatically or on user action."
       },
       {
         "type": "action",
-        "description": "Lock piece and trigger spawn attempt for next piece."
+        "description": "Trigger game events such as line clear and tetromino lock."
       },
       {
         "type": "assertion",
-        "description": "Verify the game state transitions to GAME OVER."
+        "description": "Confirm appropriate sound effects play synchronously with these events."
+      },
+      {
+        "type": "action",
+        "description": "Adjust volume controls using UI or keyboard."
       },
       {
         "type": "assertion",
-        "description": "Verify UI shows Game Over screen with options to restart or pause."
+        "description": "Verify audio volume changes accordingly without distortion or interruption."
       }
     ]
   },
   {
     "id": "TC010",
-    "title": "Pause and Resume Functionality",
-    "description": "Ensure the game can be paused and resumed seamlessly with correct UI updates and game state preservation.",
-    "category": "functional",
-    "priority": "Medium",
+    "title": "Keyboard Input Responsiveness and Edge Cases",
+    "description": "Ensure keyboard inputs respond immediately and handle edge cases such as repeated rapid key presses and invalid keys.",
+    "category": "error handling",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Start a game and begin playing."
-      },
-      {
-        "type": "action",
-        "description": "Trigger pause command."
+        "description": "Rapidly press arrow keys for movement and rotation repeatedly."
       },
       {
         "type": "assertion",
-        "description": "Verify game logic halts and UI shows paused state."
+        "description": "Verify the game processes inputs smoothly without lag or missed actions."
       },
       {
         "type": "action",
-        "description": "Trigger resume command."
+        "description": "Press keys that are not bound to any game action (e.g. alphabet keys)."
       },
       {
         "type": "assertion",
-        "description": "Verify game resumes from paused state without losing progress."
+        "description": "Confirm no unwanted actions or errors occur."
+      },
+      {
+        "type": "action",
+        "description": "Simultaneously press multiple control keys."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify correct prioritized handling of simultaneous inputs."
       }
     ]
   },
   {
     "id": "TC011",
-    "title": "Hold Queue Functionality",
-    "description": "Validate holding a piece removes it from current play and stores it, with restrictions on subsequent holds in the same drop.",
+    "title": "Game State Persistence on Pause and Resume",
+    "description": "Verify that game state (score, level, board, active piece) persists correctly when game is paused and resumed.",
     "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Start a new game and allow a piece to spawn."
+        "description": "Start gameplay and achieve some progress (some pieces locked, score/level updated)."
       },
       {
         "type": "action",
-        "description": "Press the hold key to store the active piece."
+        "description": "Activate pause functionality."
       },
       {
         "type": "assertion",
-        "description": "Verify the held piece is stored and the next piece spawns."
+        "description": "Confirm gameplay halts and UI indicates paused state."
       },
       {
         "type": "action",
-        "description": "Attempt to hold again before locking current piece."
+        "description": "Resume gameplay."
       },
       {
         "type": "assertion",
-        "description": "Verify holding is disallowed until piece locks."
+        "description": "Verify game state including score, level, locked pieces and active tetromino remain unchanged except time progress."
       }
     ]
   },
   {
     "id": "TC012",
-    "title": "Next Piece Queue Display",
-    "description": "Verify that the queue of next upcoming pieces is displayed and updated correctly as pieces spawn.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Start a game."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify next pieces queue displays correctly on UI."
-      },
-      {
-        "type": "action",
-        "description": "Lock a piece and observe next piece spawning."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify next pieces queue updates accordingly."
-      }
-    ]
-  },
-  {
-    "id": "TC013",
-    "title": "Canvas Rendering at 60 FPS",
-    "description": "Ensure the game board canvas renders smoothly at 60 FPS without graphical glitches during gameplay.",
+    "title": "Performance Under Extended Gameplay",
+    "description": "Verify there is no performance degradation or crashes during extended play session across different browsers.",
     "category": "performance",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Start a game and observe gameplay."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify the canvas updates smoothly at approx. 60 frames per second."
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure no graphical artifacts or flickering occur."
-      }
-    ]
-  },
-  {
-    "id": "TC014",
-    "title": "Background Image Transitions",
-    "description": "Validate that background images switch smoothly between day and night Gwanghwamun scenes based on game level.",
-    "category": "ui",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Start a game and progress levels incrementally."
+        "description": "Play the game continuously for at least 30 minutes or until level 10+ is reached."
       },
       {
         "type": "assertion",
-        "description": "Verify background transitions smoothly from day to night scenes at specified level thresholds."
+        "description": "Confirm consistent frame rate and responsive controls throughout."
       },
       {
         "type": "assertion",
-        "description": "Ensure transitions do not disrupt gameplay or cause visible glitches."
-      }
-    ]
-  },
-  {
-    "id": "TC015",
-    "title": "Visual Styling Conformance",
-    "description": "Check that all visual elements including Hanok-style frames, Obangsaek neon glow for tetrominoes, and traditional Korean patterns are displayed as specified.",
-    "category": "ui",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Load the main game page."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify Hanok-style framing around the game board is present and styled properly."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm tetromino blocks are rendered with Neon Glow using Obangsaek color scheme."
-      },
-      {
-        "type": "assertion",
-        "description": "Check presence of traditional Korean pattern overlays if any."
-      }
-    ]
-  },
-  {
-    "id": "TC016",
-    "title": "Audio Playback for Background Music",
-    "description": "Ensure background music loops continuously with traditional Korean instrument sounds blended with modern beats.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Start a game."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify background music starts playing automatically."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm music loops seamlessly."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify traditional Korean instrument sounds and modern beats are audibly layered."
-      }
-    ]
-  },
-  {
-    "id": "TC017",
-    "title": "Audio Playback of Sound Effects",
-    "description": "Validate that sound effects for piece rotations, drops, and line clears play correctly and synchronously with game events.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Start a game."
+        "description": "Verify no crashes, freezes, or memory leaks occur."
       },
       {
         "type": "action",
-        "description": "Rotate pieces multiple times."
+        "description": "Repeat test on Chrome, Firefox, and Edge browsers."
       },
       {
         "type": "assertion",
-        "description": "Verify rotation sound effects play on each valid rotation."
-      },
-      {
-        "type": "action",
-        "description": "Soft drop and hard drop pieces."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm drop sound effects play accordingly."
-      },
-      {
-        "type": "action",
-        "description": "Clear lines by locking pieces."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm clearing line sound effects play on correct events."
-      }
-    ]
-  },
-  {
-    "id": "TC018",
-    "title": "Game State Management Accuracy via Zustand",
-    "description": "Verify that the Zustand store accurately reflects real-time score, level, lines cleared, hold piece, and game status changes.",
-    "category": "functional",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Start a new game."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify initial Zustand store values for score, level, lines, hold piece, and status."
-      },
-      {
-        "type": "action",
-        "description": "Play through game events such as piece movement, locking, line clearing, and holding pieces."
-      },
-      {
-        "type": "assertion",
-        "description": "Continuously verify the Zustand store updates correctly reflecting those game states."
-      }
-    ]
-  },
-  {
-    "id": "TC019",
-    "title": "Error Handling: Invalid Keyboard Inputs",
-    "description": "Verify that invalid or unsupported keyboard inputs are ignored and do not affect game state or cause errors.",
-    "category": "error handling",
-    "priority": "Low",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Start a game."
-      },
-      {
-        "type": "action",
-        "description": "Press unsupported keys or random keypresses."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm no game state changes or crashes occur."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify UI and game logic continue functioning normally."
-      }
-    ]
-  },
-  {
-    "id": "TC020",
-    "title": "Edge Case: Rotation at Board Corners",
-    "description": "Test tetromino rotations at the corners and edges of the game board to ensure correct collision detection and no glitches.",
-    "category": "functional",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Start a game and move tetromino to each corner and edge."
-      },
-      {
-        "type": "action",
-        "description": "Attempt rotations at those positions."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify rotations only occur if no collision and stays within bounds."
-      },
-      {
-        "type": "assertion",
-        "description": "Check no visual glitches or off-board rendering."
+        "description": "Verify consistent performance and no browser-specific issues."
       }
     ]
   }
