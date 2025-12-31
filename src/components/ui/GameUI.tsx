@@ -1,13 +1,15 @@
 import React from 'react';
+import { Leaderboard, LeaderboardEntry } from './Leaderboard';
 
 interface GameUIProps {
     children: React.ReactNode;
     score: number;
     level: number;
     lines: number;
+    leaderboardEntries?: LeaderboardEntry[];
 }
 
-export function GameUI({ children, score, level, lines }: GameUIProps) {
+export function GameUI({ children, score, level, lines, leaderboardEntries = [] }: GameUIProps) {
     return (
         <div className="relative flex min-h-screen flex-col items-center justify-center p-2 md:p-4 pb-32 md:pb-4">
             {/* Background with overlay */}
@@ -15,14 +17,11 @@ export function GameUI({ children, score, level, lines }: GameUIProps) {
             <div className="absolute inset-0 z-0 bg-black/40" />
 
             {/* Main Game Container - Hanok Style */}
-            <div className="z-10 flex flex-col items-center gap-3 md:gap-6 md:flex-row md:items-start w-full max-w-screen-lg">
+            <div className="z-10 flex flex-col items-center gap-3 md:gap-6 lg:flex-row lg:items-start w-full max-w-screen-xl">
 
-                {/* Left Column (Hold/Status - Optional for MVP, placeholder) */}
-                <div className="hidden flex-col gap-4 md:flex">
-                    <div className="hanok-frame h-32 w-32 bg-black/60 p-4">
-                        <h3 className="mb-2 text-center font-bold text-obangsaek-baek text-shadow-neon">HOLD</h3>
-                        {/* Hold Piece Render Here */}
-                    </div>
+                {/* Left Column - Leaderboard (Desktop) */}
+                <div className="hidden lg:flex flex-col gap-4 w-80">
+                    <Leaderboard entries={leaderboardEntries} currentScore={score} />
                 </div>
 
                 {/* Center - Game Board */}
@@ -92,6 +91,11 @@ export function GameUI({ children, score, level, lines }: GameUIProps) {
                         <p>Space : Hard Drop</p>
                     </div>
                 </div>
+            </div>
+
+            {/* Mobile Leaderboard - Bottom */}
+            <div className="lg:hidden w-full max-w-md mt-6 z-10">
+                <Leaderboard entries={leaderboardEntries} currentScore={score} />
             </div>
         </div>
     );
