@@ -201,7 +201,19 @@ export function GameBoard() {
 
     }, [blockSize]);
 
-    useGameLoop({ onUpdate: update, onRender: render });
+    const { startLoop, stopLoop } = useGameLoop({ onUpdate: update, onRender: render });
+
+    // Start game loop
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const cleanup = startLoop(ctx);
+        return cleanup;
+    }, [startLoop]);
 
     // Inputs
     useEffect(() => {

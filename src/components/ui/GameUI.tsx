@@ -11,13 +11,13 @@ interface GameUIProps {
 
 export function GameUI({ children, score, level, lines, leaderboardEntries = [] }: GameUIProps) {
     return (
-        <div className="relative flex min-h-screen flex-col items-center justify-center p-2 md:p-4 pb-32 md:pb-4">
+        <div className="relative flex min-h-screen flex-col items-start md:items-center p-2 md:p-4 pt-2 pb-44 md:pb-4 overflow-x-hidden">
             {/* Background with overlay */}
             <div className="absolute inset-0 z-0 bg-gwanghwamun-night bg-cover bg-center opacity-80" />
             <div className="absolute inset-0 z-0 bg-black/40" />
 
             {/* Main Game Container - Hanok Style */}
-            <div className="z-10 flex flex-col items-center gap-3 md:gap-6 lg:flex-row lg:items-start w-full max-w-screen-xl">
+            <div className="z-10 flex flex-col items-center gap-3 md:gap-6 lg:flex-row lg:items-start w-full max-w-screen-xl mt-2 md:mt-0">
 
                 {/* Left Column - Leaderboard (Desktop) */}
                 <div className="hidden lg:flex flex-col gap-4 w-80">
